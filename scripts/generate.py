@@ -10,6 +10,7 @@ import json
 import os
 import re
 import sys
+import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -23,7 +24,7 @@ DOCS = ROOT / "docs"
 ARCHIVE = DOCS / "archive"
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
 GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
     f"{GEMINI_MODEL}:generateContent"
@@ -145,7 +146,13 @@ def summarize_with_gemini(categories):
         text = re.sub(r"^```(json)?|```$", "", text.strip(), flags=re.M).strip()
         summaries = {s["id"]: s for s in json.loads(text)}
     except Exception as ex:
-        print(f"[warn] Gemini summarization failed: {ex}", file=sys.stderr)
+        detail = ""
+        if isinstance(ex, urllib.error.HTTPError):
+            try:
+                detail = f" body={ex.read().decode('utf-8', 'replace')[:500]}"
+            except Exception:
+                pass
+        print(f"[warn] Gemini summarization failed: {ex}{detail}", file=sys.stderr)
         return
 
     idx = 0
