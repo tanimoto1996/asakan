@@ -8,6 +8,8 @@ categories:
         url: "https://aws.amazon.com/jp/about-aws/whats-new/recent/feed/"
       - name: "AWS News Blog"
         url: "https://aws.amazon.com/blogs/aws/feed/"
+      - name: "AWS CDK Releases"
+        url: "https://github.com/aws/aws-cdk/releases.atom"
 
   - name: "Cloudflare"
     icon: "🌐"
