@@ -1,0 +1,35 @@
+{
+  "name": "morning-paper",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    // claude-code側のNode自動インストールはtrixieで失敗するため明示的に入れる
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+  },
+  // node → claude-code の順にインストールさせる
+  "overrideFeatureInstallOrder": [
+    "ghcr.io/devcontainers/features/node",
+    "ghcr.io/anthropics/devcontainer-features/claude-code"
+  ],
+  // Claude Codeのログイン情報・設定をコンテナ再作成後も保持する
+  "mounts": [
+    "source=claude-config-${devcontainerId},target=/home/vscode/.claude,type=volume"
+  ],
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude",
+    "TZ": "Asia/Tokyo"
+  },
+  "containerUser": "vscode",
+  "postCreateCommand": "pip install --user feedparser pyyaml && sudo chown -R vscode:vscode /home/vscode/.claude",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "redhat.vscode-yaml",
+        "github.vscode-github-actions"
+      ]
+    }
+  }
+}

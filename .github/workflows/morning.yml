@@ -1,0 +1,55 @@
+name: morning-paper
+
+on:
+  schedule:
+    # UTC 21:30 = JST 6:30 (毎日)
+    - cron: "30 21 * * *"
+  workflow_dispatch: {} # 手動実行用
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install feedparser pyyaml
+
+      - name: Generate morning paper
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # モデルを変えたいときは Repository variables に GEMINI_MODEL を設定
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
+        run: python scripts/generate.py
+
+      - name: Set date
+        id: date
+        run: echo "today=$(TZ=Asia/Tokyo date +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        run: |
+          git config user.name "morning-paper-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/
+          git diff --cached --quiet || git commit -m "朝刊 ${{ steps.date.outputs.today }}"
+          git push
+
+      - name: Send email
+        if: ${{ secrets.MAIL_USERNAME != '' }}
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "☕ テック朝刊 ${{ steps.date.outputs.today }}"
+          from: Morning Paper <${{ secrets.MAIL_USERNAME }}>
+          to: ${{ secrets.MAIL_TO }}
+          html_body: file://docs/index.html

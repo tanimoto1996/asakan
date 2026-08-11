@@ -1,0 +1,48 @@
+# 朝刊の購読フィード定義
+# category ごとに紙面のセクションが分かれます。追加・削除は自由。
+categories:
+  - name: "AWS"
+    icon: "☁️"
+    feeds:
+      - name: "AWS What's New (日本語)"
+        url: "https://aws.amazon.com/jp/about-aws/whats-new/recent/feed/"
+      - name: "AWS News Blog"
+        url: "https://aws.amazon.com/blogs/aws/feed/"
+
+  - name: "Cloudflare"
+    icon: "🌐"
+    feeds:
+      - name: "Cloudflare Blog"
+        url: "https://blog.cloudflare.com/rss/"
+
+  - name: "Laravel"
+    icon: "🐘"
+    feeds:
+      - name: "Laravel News"
+        url: "https://laravel-news.com/feed"
+      - name: "Laravel Blog"
+        url: "https://blog.laravel.com/feed"
+
+  - name: "生成AI"
+    icon: "🤖"
+    feeds:
+      - name: "Anthropic News (unofficial mirror)"
+        url: "https://rsshub.bestblogs.dev/anthropic/news"
+      - name: "Claude Blog (unofficial mirror)"
+        url: "https://tim-hilde.github.io/anthropic-rss/rss.xml"
+      - name: "Claude Code Releases"
+        url: "https://github.com/anthropics/claude-code/releases.atom"
+      - name: "OpenAI News"
+        url: "https://openai.com/news/rss.xml"
+      - name: "Google Gemini Blog"
+        url: "https://blog.google/products/gemini/rss/"
+      - name: "Kiro Blog"
+        url: "https://kiro.dev/blog/feed.rss"
+      - name: "Kiro Changelog"
+        url: "https://kiro.dev/changelog/feed.rss"
+
+# 何時間前までの記事を「新着」とするか(cron間隔に合わせる)
+window_hours: 26
+
+# 1カテゴリあたりの最大記事数(多すぎる日の暴走防止)
+max_items_per_category: 15
