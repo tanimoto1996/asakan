@@ -45,6 +45,14 @@ categories:
         url: "https://b.hatena.ne.jp/q/Laravel?mode=rss&sort=recent&users=3&target=tag"
         window_hours: 72
 
+  - name: "GitHub"
+    icon: "🐙"
+    feeds:
+      - name: "GitHub ブログ (日本語)"
+        url: "https://github.blog/jp/feed/"
+      - name: "GitHub Changelog"
+        url: "https://github.blog/changelog/feed/"
+
   - name: "生成AI"
     icon: "🤖"
     feeds:
