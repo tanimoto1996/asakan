@@ -46,14 +46,43 @@ def entry_datetime(entry):
     return None
 
 
+def load_published_urls(days=3):
+    """直近のアーカイブに掲載済みのURLを集める(同一記事の連日掲載を防ぐ)。
+    本日分は再実行時に全記事が消えてしまうため除外する。
+    """
+    today = datetime.now(JST).strftime("%Y-%m-%d")
+    seen = set()
+    if not ARCHIVE.exists():
+        return seen
+    files = sorted(
+        (f for f in ARCHIVE.glob("*.html")
+         if f.name != "index.html" and f.stem != today),
+        reverse=True,
+    )
+    for f in files[:days]:
+        try:
+            seen |= set(re.findall(
+                r"href='(https?://[^']+)'", f.read_text(encoding="utf-8")
+            ))
+        except Exception as ex:
+            print(f"[warn] archive unreadable: {f}: {ex}", file=sys.stderr)
+    return seen
+
+
 def collect_articles(config):
     """フィードを巡回して window_hours 以内の新着を集める"""
-    window = timedelta(hours=config.get("window_hours", 26))
-    cutoff = datetime.now(timezone.utc) - window
+    now = datetime.now(timezone.utc)
+    default_window = config.get("window_hours", 26)
+    seen = load_published_urls()  # 過去号+この実行内での重複排除に使う
     result = []
     for cat in config["categories"]:
         items = []
         for feed in cat["feeds"]:
+            # トレンド系フィードは古めの記事も載るため、フィード単位で窓を広げられる
+            cutoff = now - timedelta(
+                hours=feed.get("window_hours", default_window)
+            )
+            feed_items = []
             try:
                 parsed = feedparser.parse(
                     feed["url"], agent="Mozilla/5.0 (MorningPaperBot)"
@@ -69,11 +98,15 @@ def collect_articles(config):
                     dt = entry_datetime(e)
                     if dt is None or dt < cutoff:
                         continue
-                    items.append({
+                    url = e.get("link", "")
+                    if url in seen:
+                        continue
+                    seen.add(url)
+                    feed_items.append({
                         "ts": dt.timestamp(),
                         "source": feed["name"],
                         "title": strip_tags(e.get("title", "(no title)"), 200),
-                        "url": e.get("link", ""),
+                        "url": url,
                         "summary_src": strip_tags(
                             e.get("summary", "") or e.get("description", "")
                         ),
@@ -84,6 +117,9 @@ def collect_articles(config):
                     })
             except Exception as ex:  # フィード単位の失敗は握りつぶして続行
                 print(f"[warn] feed failed: {feed['url']}: {ex}", file=sys.stderr)
+            # max_items はフィードの掲載順(人気フィードならランキング順)で先頭から採用
+            limit = feed.get("max_items")
+            items.extend(feed_items[:limit] if limit else feed_items)
         items.sort(key=lambda x: x["ts"], reverse=True)
         limit = config.get("max_items_per_category", 15)
         result.append({

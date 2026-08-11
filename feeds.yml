@@ -1,21 +1,38 @@
 # 朝刊の購読フィード定義
 # category ごとに紙面のセクションが分かれます。追加・削除は自由。
+#
+# フィード単位のオプション:
+#   window_hours: この時間内の記事だけ採用(省略時はファイル末尾のデフォルト値)。
+#                 トレンド系フィードは数日前の記事もランクインするため広めに設定する。
+#   max_items:    フィードの掲載順で先頭からN件だけ採用(人気フィードのTOP N用)。
+# ※過去3日分のアーカイブに載ったURLは自動で除外される(連日掲載の防止)
 categories:
   - name: "AWS"
     icon: "☁️"
     feeds:
       - name: "AWS What's New (日本語)"
         url: "https://aws.amazon.com/jp/about-aws/whats-new/recent/feed/"
+      - name: "AWS 日本語ブログ"
+        url: "https://aws.amazon.com/jp/blogs/news/feed/"
       - name: "AWS News Blog"
         url: "https://aws.amazon.com/blogs/aws/feed/"
       - name: "AWS CDK Releases"
         url: "https://github.com/aws/aws-cdk/releases.atom"
+      - name: "DevelopersIO"
+        url: "https://dev.classmethod.jp/feed/"
+        max_items: 5 # 記事数が多いので絞る
+      - name: "はてブ話題 (AWS)"
+        url: "https://b.hatena.ne.jp/q/AWS?mode=rss&sort=recent&users=5"
+        window_hours: 72
 
   - name: "Cloudflare"
     icon: "🌐"
     feeds:
       - name: "Cloudflare Blog"
         url: "https://blog.cloudflare.com/rss/"
+      - name: "はてブ話題 (Cloudflare)"
+        url: "https://b.hatena.ne.jp/q/Cloudflare?mode=rss&sort=recent&users=3"
+        window_hours: 72
 
   - name: "Laravel"
     icon: "🐘"
@@ -24,6 +41,9 @@ categories:
         url: "https://laravel-news.com/feed"
       - name: "Laravel Blog"
         url: "https://blog.laravel.com/feed"
+      - name: "はてブ話題 (Laravel)"
+        url: "https://b.hatena.ne.jp/q/Laravel?mode=rss&sort=recent&users=3"
+        window_hours: 72
 
   - name: "生成AI"
     icon: "🤖"
@@ -42,6 +62,23 @@ categories:
         url: "https://kiro.dev/blog/feed.rss"
       - name: "Kiro Changelog"
         url: "https://kiro.dev/changelog/feed.rss"
+      - name: "はてブ話題 (生成AI)"
+        url: "https://b.hatena.ne.jp/q/生成AI?mode=rss&sort=recent&users=5"
+        window_hours: 72
+
+  - name: "国内トレンド"
+    icon: "📈"
+    feeds:
+      - name: "Publickey"
+        url: "https://www.publickey1.jp/atom.xml"
+      - name: "Qiita 人気記事"
+        url: "https://qiita.com/popular-items/feed.atom"
+        window_hours: 72
+        max_items: 3
+      - name: "Zenn トレンド"
+        url: "https://zenn.dev/feed"
+        window_hours: 72
+        max_items: 3
 
 # 何時間前までの記事を「新着」とするか(cron間隔に合わせる)
 window_hours: 26
