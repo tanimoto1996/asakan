@@ -12,6 +12,9 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      # secrets は if: 条件式で直接参照できないため env 経由で判定する
+      MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,7 +45,7 @@ jobs:
           git push
 
       - name: Send email
-        if: ${{ secrets.MAIL_USERNAME != '' }}
+        if: ${{ env.MAIL_USERNAME != '' }}
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
