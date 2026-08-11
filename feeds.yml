@@ -22,7 +22,7 @@ categories:
         url: "https://dev.classmethod.jp/feed/"
         max_items: 5 # 記事数が多いので絞る
       - name: "はてブ話題 (AWS)"
-        url: "https://b.hatena.ne.jp/q/AWS?mode=rss&sort=recent&users=5"
+        url: "https://b.hatena.ne.jp/q/AWS?mode=rss&sort=recent&users=5&target=tag"
         window_hours: 72
 
   - name: "Cloudflare"
@@ -31,7 +31,7 @@ categories:
       - name: "Cloudflare Blog"
         url: "https://blog.cloudflare.com/rss/"
       - name: "はてブ話題 (Cloudflare)"
-        url: "https://b.hatena.ne.jp/q/Cloudflare?mode=rss&sort=recent&users=3"
+        url: "https://b.hatena.ne.jp/q/Cloudflare?mode=rss&sort=recent&users=3&target=tag"
         window_hours: 72
 
   - name: "Laravel"
@@ -42,7 +42,7 @@ categories:
       - name: "Laravel Blog"
         url: "https://blog.laravel.com/feed"
       - name: "はてブ話題 (Laravel)"
-        url: "https://b.hatena.ne.jp/q/Laravel?mode=rss&sort=recent&users=3"
+        url: "https://b.hatena.ne.jp/q/Laravel?mode=rss&sort=recent&users=3&target=tag"
         window_hours: 72
 
   - name: "生成AI"
@@ -63,7 +63,7 @@ categories:
       - name: "Kiro Changelog"
         url: "https://kiro.dev/changelog/feed.rss"
       - name: "はてブ話題 (生成AI)"
-        url: "https://b.hatena.ne.jp/q/生成AI?mode=rss&sort=recent&users=5"
+        url: "https://b.hatena.ne.jp/q/生成AI?mode=rss&sort=recent&users=5&target=tag"
         window_hours: 72
 
   - name: "国内トレンド"
