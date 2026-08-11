@@ -10,6 +10,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -167,28 +168,44 @@ def summarize_with_gemini(categories):
             "responseMimeType": "application/json",
         },
     }).encode()
-    req = urllib.request.Request(
-        GEMINI_URL,
-        data=body,
-        headers={
-            "Content-Type": "application/json",
-            "x-goog-api-key": GEMINI_API_KEY,
-        },
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=180) as resp:
-            data = json.loads(resp.read())
-        text = data["candidates"][0]["content"]["parts"][0]["text"]
-        text = re.sub(r"^```(json)?|```$", "", text.strip(), flags=re.M).strip()
-        summaries = {s["id"]: s for s in json.loads(text)}
-    except Exception as ex:
-        detail = ""
-        if isinstance(ex, urllib.error.HTTPError):
-            try:
-                detail = f" body={ex.read().decode('utf-8', 'replace')[:500]}"
-            except Exception:
-                pass
-        print(f"[warn] Gemini summarization failed: {ex}{detail}", file=sys.stderr)
+    # 一時的な過負荷(503等)対策のリトライ。1日1リクエストの原則は失敗時の再試行には適用しない
+    summaries = None
+    for attempt, wait in enumerate([0, 20, 60], start=1):
+        if wait:
+            time.sleep(wait)
+        req = urllib.request.Request(
+            GEMINI_URL,
+            data=body,
+            headers={
+                "Content-Type": "application/json",
+                "x-goog-api-key": GEMINI_API_KEY,
+            },
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=180) as resp:
+                data = json.loads(resp.read())
+            text = data["candidates"][0]["content"]["parts"][0]["text"]
+            text = re.sub(r"^```(json)?|```$", "", text.strip(), flags=re.M).strip()
+            summaries = {s["id"]: s for s in json.loads(text)}
+            break
+        except Exception as ex:
+            detail = ""
+            retryable = True
+            if isinstance(ex, urllib.error.HTTPError):
+                retryable = ex.code >= 500 or ex.code == 429
+                try:
+                    detail = f" body={ex.read().decode('utf-8', 'replace')[:500]}"
+                except Exception:
+                    pass
+            print(
+                f"[warn] Gemini attempt {attempt} failed: {ex}{detail}",
+                file=sys.stderr,
+            )
+            if not retryable:
+                break
+    if summaries is None:
+        print("[warn] Gemini summarization gave up; publishing without summaries",
+              file=sys.stderr)
         return
 
     idx = 0
